@@ -567,6 +567,9 @@ static void option_instat_callback(struct urb *urb);
 
 
 static const struct usb_device_id option_ids[] = {
+	#if 1 // Added by Eigenlink
+	{ USB_DEVICE(0x2C7C, 0x0620) }, /* Eigenlink EM20-G */
+	#endif			
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_COLT) },
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_RICOLA) },
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_RICOLA_LIGHT) },
@@ -2020,6 +2023,9 @@ static struct usb_serial_driver option_1port_device = {
 	.suspend           = usb_wwan_suspend,
 	.resume            = usb_wwan_resume,
 #endif
+	#if 1 // Added by Eigenlink
+	.reset_resume = usb_wwan_resume,
+	#endif							   
 };
 
 static struct usb_serial_driver * const serial_drivers[] = {
@@ -2054,6 +2060,15 @@ static int option_probe(struct usb_serial *serial,
 	if (device_flags & NUMEP2 && iface_desc->bNumEndpoints != 2)
 		return -ENODEV;
 
+	/* Added by Eigenlink */
+	if (serial->dev->descriptor.idVendor == cpu_to_le16(0x2C7C)
+			&& serial->interface->cur_altsetting->desc.bInterfaceNumber >= 4)
+		return -ENODEV;
+
+	if (serial->dev->descriptor.idVendor == cpu_to_le16(0x2C7C)) {
+		pm_runtime_set_autosuspend_delay(&serial->dev->dev, 3000);
+		usb_enable_autosuspend(serial->dev);
+		device_init_wakeup(&serial->dev->dev, 1); //usb remote wakeup
 	/* Store the device flags so we can use them during attach. */
 	usb_set_serial_data(serial, (void *)device_flags);
 
