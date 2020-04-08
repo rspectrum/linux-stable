@@ -2022,10 +2022,8 @@ static struct usb_serial_driver option_1port_device = {
 #ifdef CONFIG_PM
 	.suspend           = usb_wwan_suspend,
 	.resume            = usb_wwan_resume,
-#endif
-	#if 1 // Added by Eigenlink
 	.reset_resume = usb_wwan_resume,
-	#endif							   
+#endif
 };
 
 static struct usb_serial_driver * const serial_drivers[] = {
@@ -2069,6 +2067,8 @@ static int option_probe(struct usb_serial *serial,
 		pm_runtime_set_autosuspend_delay(&serial->dev->dev, 3000);
 		usb_enable_autosuspend(serial->dev);
 		device_init_wakeup(&serial->dev->dev, 1); //usb remote wakeup
+	}
+	
 	/* Store the device flags so we can use them during attach. */
 	usb_set_serial_data(serial, (void *)device_flags);
 
