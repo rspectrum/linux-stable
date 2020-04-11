@@ -510,6 +510,7 @@ static struct urb *usb_wwan_setup_urb(struct usb_serial_port *port,
 			urb->transfer_flags |= URB_ZERO_PACKET;
 		if (desc->idVendor == cpu_to_le16(0x2C7C))
 			urb->transfer_flags |= URB_ZERO_PACKET;
+	}
 
 	return urb;
 }
